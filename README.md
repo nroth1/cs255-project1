@@ -1,7 +1,7 @@
 # CS255-project1
 Nat Roth, Yanshu Hong
 
-## Implementation Thoughts (Nat)
+### Implementation Thoughts
 
 1. For generating keys from the master password, can we reuse the same key for both the HMAC and for encrpyting the values? 
  - I'm not sure about this. I guess probably not. I took a look at the PBKDF2 function and it takes a password and a salt. So salt is generally a random integer, but I guess a different (salt, password) pair is going to derive a different key. So are we going to store the salt in the database? (we have to reuse the same salt) And if we use two different salts, we can have two different keys derived from the same password.
@@ -14,8 +14,9 @@ Nat Roth, Yanshu Hong
  - I agree with you. For swapping, we can auth encrypt "HMAC(domain)||password" and every time we decrypt, we have to assert that the decrypted HMAC(domain) is actually the same as the explicit HMAC(DOMAIN). And becasue HMAC(DOMAIN) has a set length, it's easy to seperate it from the real passwords.
  - For rollbacks, just hash the entire dictionary using SHA-256? Yeah, probably.
 
-My main questions:
-1. How to authenticate the master password?
+**My main questions:**
 
-2. How to pad HMAC||password to a given length?
+ - How to authenticate the master password?
+
+ - How to pad HMAC||password to a given length?
 

@@ -1,8 +1,8 @@
 # CS255-project1
-Nat Roth
+Nat Roth,
 Yanshu Hong
 
-# Implementation Thoughts (Nat)
+## Implementation Thoughts (Nat)
 
 1. For generating keys from the master password, can we reuse the same key for both the HMAC and for encrpyting the values? 
 

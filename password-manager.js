@@ -37,12 +37,16 @@ var KDF = lib.KDF,
 var keychain = function() {
   // Class-private instance variables.
   var priv = {
-    secrets: { /* Your secrets here */ },
-    data: { /* Non-secret data here */ }
+    secrets: { /* We are so honest! */ },
+    data: { salt, auth_message, auth_cipher_text }
   };
 
   // Maximum length of each record in bytes
   var MAX_PW_LEN_BYTES = 64;
+  
+  var HMAC_LENGTH = ??;
+  var MINIMUM_PAD_LEGNTH = 1;
+
   
   // Flag to indicate whether password manager is "ready" or not
   var ready = false;
@@ -57,7 +61,7 @@ var keychain = function() {
     *   password: string
     * Return Type: void
     */
-  keychain.init = function(password) {
+  keychain.init = function(password) {  /*N*/
     priv.data.version = "CS 255 Password Manager v1.0";
   };
 
@@ -78,7 +82,7 @@ var keychain = function() {
     *   trusted_data_check: string
     * Return Type: boolean
     */
-  keychain.load = function(password, repr, trusted_data_check) {
+  keychain.load = function(password, repr, trusted_data_check) { /*H*/
     throw "Not implemented!";
   };
 
@@ -95,7 +99,7 @@ var keychain = function() {
     *
     * Return Type: array
     */ 
-  keychain.dump = function() {
+  keychain.dump = function() { /*N*/
     throw "Not implemented!";
   }
 
@@ -109,7 +113,7 @@ var keychain = function() {
     *   name: string
     * Return Type: string
     */
-  keychain.get = function(name) {
+  keychain.get = function(name) { /*H*/
     throw "Not implemented!";
   }
 
@@ -124,7 +128,7 @@ var keychain = function() {
   *   value: string
   * Return Type: void
   */
-  keychain.set = function(name, value) {
+  keychain.set = function(name, value) { /*N*/
     throw "Not implemented!";
   }
 
@@ -137,7 +141,7 @@ var keychain = function() {
     *   name: string
     * Return Type: boolean
   */
-  keychain.remove = function(name) {
+  keychain.remove = function(name) { /*H*/
     throw "Not implemented!";
   }
 

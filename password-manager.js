@@ -38,13 +38,13 @@ var keychain = function() {
   // Class-private instance variables.
   var priv = {
     secrets: { /* We are so honest! */ },
-    data: { salt, auth_message, auth_cipher_text }
+    data: { salt:'', auth_message:'', auth_cipher_text:'' }
   };
 
   // Maximum length of each record in bytes
   var MAX_PW_LEN_BYTES = 64;
   
-  var HMAC_LENGTH = ??;
+  var HMAC_LENGTH = -1;
   var MINIMUM_PAD_LEGNTH = 1;
 
   
@@ -62,6 +62,9 @@ var keychain = function() {
     * Return Type: void
     */
   keychain.init = function(password) {  /*N*/
+    ready = true;
+    priv.data.salt = lib.random_bitarray; 
+    lib.KDF(password,priv.data.salt);   
     priv.data.version = "CS 255 Password Manager v1.0";
   };
 

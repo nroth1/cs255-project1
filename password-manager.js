@@ -63,8 +63,14 @@ var keychain = function() {
     */
   keychain.init = function(password) {  /*N*/
     ready = true;
-    priv.data.salt = lib.random_bitarray; 
-    lib.KDF(password,priv.data.salt);   
+    priv.data.salt = lib.random_bitarray(64);
+    var bit_arr = lib.string_to_padded_bitarray(password); 
+    var master_key = lib.KDF(password,priv.data.salt);
+    priv.data.auth_message = lib.random_bitarray(128)
+    //var cipher = lib.setup_cipher(master_key)
+    console.log(bitarray_len(master_key))
+    priv.data.auth_cipher_text = enc_gcm(cipher,bitarray_to_string(priv.data.auth_message)) 
+    console.log(priv.data.auth_cipher_text );
     priv.data.version = "CS 255 Password Manager v1.0";
   };
 

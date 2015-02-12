@@ -37,14 +37,14 @@ var KDF = lib.KDF,
 var keychain = function() {
   // Class-private instance variables.
   var priv = {
-    secrets: { SHA_hash },
-    data: { salt, auth_message, auth_cipher_text }
+    secrets: { SHA_hash:'' },
+    data: { salt:'', auth_message:'', auth_cipher_text:'' }
   };
 
   // Maximum length of each record in bytes
   var MAX_PW_LEN_BYTES = 64;
   
-  var HMAC_LENGTH = ??;
+  var HMAC_LENGTH = -1;
   var MINIMUM_PAD_LEGNTH = 1;
 
   
@@ -62,6 +62,15 @@ var keychain = function() {
     * Return Type: void
     */
   keychain.init = function(password) {  /*N*/
+    ready = true;
+    priv.data.salt = lib.random_bitarray(64);
+    var bit_arr = lib.string_to_padded_bitarray(password); 
+    var master_key = lib.KDF(password,priv.data.salt);
+    priv.data.auth_message = lib.random_bitarray(128)
+    //var cipher = lib.setup_cipher(master_key)
+    console.log(bitarray_len(master_key))
+    priv.data.auth_cipher_text = enc_gcm(cipher,bitarray_to_string(priv.data.auth_message)) 
+    console.log(priv.data.auth_cipher_text );
     priv.data.version = "CS 255 Password Manager v1.0";
   };
 

@@ -37,17 +37,16 @@ var KDF = lib.KDF,
 var keychain = function() {
   // Class-private instance variables.
   var priv = {
-    secrets: { SHA_hash:'' },
-    data: { salt:'', 
+    secrets: { SHA_hash:'',salt:'', 
             auth_message:'', auth_cipher_text:'', 
-            key_HMAC_message:'', key_GCM_message:'' }
+            key_HMAC_message:'', key_GCM_message:'' },
+    data: {  }
   };
 
   // Maximum length of each record in bytes
   var MAX_PW_LEN_BYTES = 64;
   var HMAC_LENGTH = -1;
-  var MINIMUM_PAD_LEGNTH = 1;
-
+  var MINIMUM_PAD_LEGNTH = 1; 
   
   // Flag to indicate whether password manager is "ready" or not
   var ready = false;
@@ -66,16 +65,13 @@ var keychain = function() {
     ready = true;
     priv.data.salt = lib.random_bitarray(128); 
     var master_key = lib.KDF(password,priv.data.salt);
-    priv.data.auth_message = "Authenticated correctly";
+    //priv.secrets.auth_message = "Authenticated correctly";
      
-    priv.data.key_HMAC_message = "HMAC TO KEY";
-    priv.data.key_GCM_message = "GCM TO KEY";
-    var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
-    //console.log(bitarray_len(master_key))
-    priv.data.auth_cipher_text = enc_gcm(cipher,string_to_bitarray(priv.data.auth_message)); 
-    console.log(priv.data.auth_cipher_text);
-    console.log(bitarray_to_string(dec_gcm(cipher,priv.data.auth_cipher_text)) );
-    priv.data.version = "CS 255 Password Manager v1.0";
+    priv.secrets.key_HMAC_message = lib.HMAC(master_key,"HMAC TO KEY");
+    priv.secrets.key_GCM_message = lib.HMAC(master_key,"GCM TO KEY");
+    //var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
+    console.log( priv.secrets.key_GCM_message   )
+    priv.secrets.version = "CS 255 Password Manager v1.0";
   };
 
   /**
@@ -101,6 +97,8 @@ var keychain = function() {
 
     /* check the correctness of the main KEY. */
     cipher = setup_cipher(key);
+    console.log(bitarray_len(key))
+
     if (enc_gcm(cipher, auth_message) != auth_cipher_text) return false;
 
     /* check the integrity of KVS data. */
@@ -167,7 +165,12 @@ var keychain = function() {
   * Return Type: void
   */
   keychain.set = function(name, value) { /*N*/
-    throw "Not implemented!";
+    if(ready){
+    	
+    }else{
+    	throw "NOT READY"
+    }
+    //throw "Not implemented!";
   }
 
   /**

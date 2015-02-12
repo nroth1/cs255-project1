@@ -37,11 +37,10 @@ var KDF = lib.KDF,
 var keychain = function() {
   // Class-private instance variables.
   var priv = {
-<<<<<<< HEAD
     secrets: { SHA_hash:'' },
     data: { salt:'', 
             auth_message:'', auth_cipher_text:'', 
-            key_HMAC_message:'', key2_GCM_message:'' }
+            key_HMAC_message:'', key_GCM_message:'' }
   };
 
   // Maximum length of each record in bytes
@@ -70,7 +69,7 @@ var keychain = function() {
     priv.data.auth_message = "Authenticated correctly";
      
     priv.data.key_HMAC_message = "HMAC TO KEY";
-    priv.data.key_GCM__message = "GCM TO KEY";
+    priv.data.key_GCM_message = "GCM TO KEY";
     var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
     //console.log(bitarray_len(master_key))
     priv.data.auth_cipher_text = enc_gcm(cipher,string_to_bitarray(priv.data.auth_message)); 

@@ -63,12 +63,14 @@ var keychain = function() {
     */
   keychain.init = function(password) {  /*N*/
     ready = true;
+    priv.secrets = {}
+    priv.data = {}
     priv.data.salt = lib.random_bitarray(128); 
     var master_key = lib.KDF(password,priv.data.salt);
     //priv.secrets.auth_message = "Authenticated correctly";
      
-    priv.secrets.key_HMAC_message = lib.HMAC(master_key,"HMAC TO KEY");
-    priv.secrets.key_GCM_message = lib.HMAC(master_key,"GCM TO KEY");
+    priv.secrets.key_HMAC_message = bitarray_slice(lib.HMAC(master_key,"HMAC TO KEY"),0,128);
+    priv.secrets.key_GCM_message = bitarray_slice(lib.HMAC(master_key,"GCM TO KEY"),0,128);
     //var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
     console.log( priv.secrets.key_GCM_message   )
     priv.secrets.version = "CS 255 Password Manager v1.0";
@@ -166,7 +168,15 @@ var keychain = function() {
   */
   keychain.set = function(name, value) { /*N*/
     if(ready){
-    	
+    	 var domain_key = priv.secrets.key_HMAC_message; 
+   	 var value_key = priv.secrets.key_GCM_message;
+    	 var domain_HMAC = lib.HMAC(domain_key,name);
+         var val_bits = string_to_padded_bitarray(value,65);
+         var name_bits = string_to_bitarray(domain_HMAC);
+	 var signed_data = bitarray_concat(val_bits,name_bits);
+	 var encrypted_data = enc_gcm(setup_cipher( value_key ) ,signed_data)
+	 priv.data.domain_HMAC = encrypted_data 
+	 
     }else{
     	throw "NOT READY"
     }

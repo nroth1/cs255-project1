@@ -37,7 +37,7 @@ var KDF = lib.KDF,
 var keychain = function() {
   // Class-private instance variables.
   var priv = {
-    secrets: { /* We are so honest! */ },
+    secrets: { SHA_hash },
     data: { salt, auth_message, auth_cipher_text }
   };
 
@@ -83,7 +83,32 @@ var keychain = function() {
     * Return Type: boolean
     */
   keychain.load = function(password, repr, trusted_data_check) { /*H*/
-    throw "Not implemented!";
+    /* generate the main KEY from the given password. */
+    key = KDF(passowrd, salt);
+
+    /* check the correctness of the main KEY. */
+    cipher = setup_cipher(key);
+    if (enc_gcm(cipher, auth_message) != auth_cipher_text) return false;
+
+    /* check the integrity of KVS data. */
+    if (trusted_data_check) {
+        /* noraml way: compute the checksum of the repr string and compare it with the 
+        provided SHA-256 hash. */
+        hash_value = SHA256(string_to_bitarray(repr))
+        if (hash_value != trusted_data_check) throw "INVALID REPR!";
+        
+        /* extra credit: encrypt the counter concatenated with the repr string, compute
+        the checksum of the cipher text and compare it with the stored SHA-256 hash. */
+        // text = bitarray_concat(string_to_bitarray(trusted_data_check), string_to_bitarray(repr));
+        // hash_value = SHA256(enc_gcm(cipher, text));
+        // if (hash_value != priv.secrets.SHA_hash) throw "INVALID REPR!";
+    }
+
+    /* parse the jason into keycahin. */    
+    keychain = JSON.parse(repr)
+    ready = true;
+
+    return true;
   };
 
   /**

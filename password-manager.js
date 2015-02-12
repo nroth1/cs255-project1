@@ -38,12 +38,11 @@ var keychain = function() {
   // Class-private instance variables.
   var priv = {
     secrets: { /* We are so honest! */ },
-    data: { salt:'', auth_message:'', auth_cipher_text:'' }
+    data: { salt:'', auth_message:'', auth_cipher_text:'',key_HMAC_message:'',key2_GCM_message:'' }
   };
 
   // Maximum length of each record in bytes
   var MAX_PW_LEN_BYTES = 64;
-  
   var HMAC_LENGTH = -1;
   var MINIMUM_PAD_LEGNTH = 1;
 
@@ -63,14 +62,17 @@ var keychain = function() {
     */
   keychain.init = function(password) {  /*N*/
     ready = true;
-    priv.data.salt = lib.random_bitarray(64);
-    var bit_arr = lib.string_to_padded_bitarray(password); 
+    priv.data.salt = lib.random_bitarray(128); 
     var master_key = lib.KDF(password,priv.data.salt);
-    priv.data.auth_message = lib.random_bitarray(128)
-    //var cipher = lib.setup_cipher(master_key)
-    console.log(bitarray_len(master_key))
-    priv.data.auth_cipher_text = enc_gcm(cipher,bitarray_to_string(priv.data.auth_message)) 
-    console.log(priv.data.auth_cipher_text );
+    priv.data.auth_message = "Authenticated correctly";
+     
+    priv.data.key_HMAC_message = "HMAC TO KEY";
+    priv.data.key_GCM__message = "GCM TO KEY";
+    var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
+    //console.log(bitarray_len(master_key))
+    priv.data.auth_cipher_text = enc_gcm(cipher,string_to_bitarray(priv.data.auth_message)); 
+    console.log(priv.data.auth_cipher_text);
+    console.log(bitarray_to_string(dec_gcm(cipher,priv.data.auth_cipher_text)) );
     priv.data.version = "CS 255 Password Manager v1.0";
   };
 

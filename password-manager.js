@@ -107,7 +107,8 @@ var keychain = function() {
      
 
     if (!bitarray_equal(authenticated_output ,string_to_bitarray('AUTHENTICATE'))) {
-	//should set ready = false too?! 
+	//should set ready = false too?!
+	ready = false 
     	return false;
     }
 
@@ -131,6 +132,8 @@ var keychain = function() {
     priv.secrets.salt = salt
     /* parse the jason into keycahin. */    
     priv.data = JSON.parse(repr)
+    delete priv.data['salt']
+    delete priv.data['auth_message']
     // should reset keys here as well
     ready = true;
 

@@ -102,14 +102,13 @@ var keychain = function() {
     var master_key = lib.KDF(password,salt);
     var key_AUTH_message = bitarray_slice(lib.HMAC(master_key,"AUTH TO KEY"),0,128);
     
-    
+    console.log(key_AUTH_message) 
     /* check the correctness of the main KEY. */
-    var cipher = setup_cipher(key_AUTH_message);
-    var authenticated_output = enc_gcm(cipher, string_to_bitarray("AUTHENTICATE")) 
+    var cipher = setup_cipher(key_AUTH_message);	
+    var authenticated_output = dec_gcm(cipher, data['auth_message']) 
+     
 
-    if (!bitarray_equal(authenticated_output ,data['auth_message'])) {
-  	console.log(authenticated_output)
-	console.log(data['auth_message'])
+    if (!bitarray_equal(authenticated_output ,string_to_bitarray('AUTHENTICATE'))) {
 	//should set ready = false too?! 
     	return false;
     }
@@ -154,12 +153,13 @@ var keychain = function() {
 		//hacky way to make a deep copy of data map, since we don't
 		//want to add salt and auth_message to data field. 
 		var map_copy = JSON.parse(data_json)
-	
+		
 		map_copy['salt'] = priv.secrets.salt
 		map_copy['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),string_to_bitarray("AUTHENTICATE"))
 		console.log(map_copy)
 		var sha_check = lib.SHA256(data_json)
 		var to_return = [JSON.stringify(map_copy),sha_check]
+		console.log(priv.secrets.key_AUTH_message)
 		return to_return
 	}else{
 		return null

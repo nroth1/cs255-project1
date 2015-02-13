@@ -179,7 +179,6 @@ var string_to_padded_bitarray = function(s_utf8, padded_len) {
 };
 
 var string_from_padded_byte_array = function(a, padded_len) {
-  console.log(a.length)
    if (a.length != padded_len + 4) {
 	console.log('---------------')
 	console.log(a.length)

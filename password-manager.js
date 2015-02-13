@@ -74,7 +74,6 @@ var keychain = function() {
     priv.secrets.key_GCM_message = bitarray_slice(lib.HMAC(master_key,"GCM TO KEY"),0,128);
     
     //var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
-    console.log( priv.secrets.key_GCM_message   )
     priv.secrets.version = "CS 255 Password Manager v1.0";
   };
 
@@ -117,7 +116,6 @@ var keychain = function() {
         /* noraml way: compute the checksum of the repr string and compare it with the 
         provided SHA-256 hash. */
         var hash_value = SHA256(string_to_bitarray(repr))
-	console.log(hash_value)
         if (! bitarray_equal(hash_value,trusted_data_check)) throw "INVALID REPR!";
         
         /* extra credit: encrypt the counter concatenated with the repr string, compute
@@ -163,7 +161,6 @@ var keychain = function() {
 		map_copy['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),string_to_bitarray("AUTHENTICATE"))
 		var sha_check = lib.SHA256(string_to_bitarray(JSON.stringify(map_copy)))
 		var to_return = [JSON.stringify(map_copy),sha_check]
-		console.log()
 		return to_return
 	}else{
 		return null
@@ -182,7 +179,6 @@ var keychain = function() {
     */
   keychain.get = function(name) { /*H*/
     	if(ready){
-		console.log(name)
 		var domain_key = priv.secrets.key_HMAC_message; 
    		var value_key = priv.secrets.key_GCM_message;
     		var domain_HMAC = lib.HMAC(domain_key,name); 
@@ -190,8 +186,6 @@ var keychain = function() {
 			return null;	
 		}
 		var encrypted = priv.data[domain_HMAC];
-		//console.log(encrypted);
-		console.log(name);
 		var plain_bits = dec_gcm(setup_cipher(value_key),encrypted);
 	 	var password_padded = bitarray_slice(plain_bits,0,(65+4)*8);
 		var password_text = string_from_padded_bitarray(password_padded,65);

@@ -96,14 +96,24 @@ var keychain = function() {
     * Return Type: boolean
     */
   keychain.load = function(password, repr, trusted_data_check) { /*H*/
-    /* generate the main KEY from the given password. */
-    key = KDF(passowrd, salt);
+    /* generate the main KEY from the given password. */ 
+    var data = JSON.parse(repr)
+    console.log(data) 
+    priv.secrets.salt = data['salt']
 
+    console.log(priv.secrets.salt)
+    var key = lib.KDF(password, priv.secrets.salt);
+   
     /* check the correctness of the main KEY. */
-    cipher = setup_cipher(key);
+    var cipher = setup_cipher(bitarray_slice(key,0,128));
+    var authenticated_output = enc_gcm(cipher, string_to_bitarray("AUTHENTICATE")) 
     console.log(bitarray_len(key))
 
-    if (enc_gcm(cipher, auth_message) != auth_cipher_text) return false;
+    if (!bitarray_equal(authenticated_output ,data['auth_message'])) {
+  	console.log('broke')
+	//should set ready = false too?! 
+    	return false;
+    }
 
     /* check the integrity of KVS data. */
     if (trusted_data_check) {
@@ -142,10 +152,15 @@ var keychain = function() {
   keychain.dump = function() { /*N*/
   	if(ready){
 		var data_json = JSON.stringify(priv.data)
-		data_json['salt'] = priv.secrets.salt
-		data_json['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),"AUTHENTICATE")
+		//hacky way to make a deep copy of data map, since we don't
+		//want to add salt and auth_message to data field. 
+		var map_copy = JSON.parse(data_json)
+	
+		map_copy['salt'] = priv.secrets.salt
+		map_copy['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),string_to_bitarray("AUTHENTICATE"))
+		console.log(map_copy)
 		var sha_check = lib.SHA256(data_json)
-		var to_return = [data_json,sha_check]
+		var to_return = [JSON.stringify(map_copy),sha_check]
 		return to_return
 	}else{
 		return null

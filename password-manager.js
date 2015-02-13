@@ -177,7 +177,7 @@ var keychain = function() {
 		}
 		return password_text	
 	}else{
-		throw "NOT READY"
+		throw "Keychain not initialized."
 	}
   }
 
@@ -204,7 +204,7 @@ var keychain = function() {
 	 var encrypted_data = enc_gcm(setup_cipher( value_key ) , signed_data);
 	 priv.data[domain_HMAC] = encrypted_data ;
     }else{
-    	throw "NOT READY"
+    	throw "Keychain not initialized."
     }
     //throw "Not implemented!";
   }
@@ -219,7 +219,17 @@ var keychain = function() {
     * Return Type: boolean
   */
   keychain.remove = function(name) { /*H*/
-  
+	if(ready){
+		var domain_key = priv.secrets.key_HMAC_message; 
+    		var domain_HMAC = lib.HMAC(domain_key,name);
+        	if(domain_HMAC in priv.data){
+			delete priv.data[domain_HMAC]
+			return true;
+		}
+		return false;
+	}else{
+		throw "Keychain not initialized."
+	}  
   }
 
   return keychain;

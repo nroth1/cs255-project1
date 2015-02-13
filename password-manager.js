@@ -117,6 +117,7 @@ var keychain = function() {
         /* noraml way: compute the checksum of the repr string and compare it with the 
         provided SHA-256 hash. */
         var hash_value = SHA256(string_to_bitarray(repr))
+	console.log(hash_value)
         if (! bitarray_equal(hash_value,trusted_data_check)) throw "INVALID REPR!";
         
         /* extra credit: encrypt the counter concatenated with the repr string, compute
@@ -126,6 +127,10 @@ var keychain = function() {
         // if (hash_value != priv.secrets.SHA_hash) throw "INVALID REPR!";
     }
 
+    priv.secrets.key_AUTH_message = bitarray_slice(lib.HMAC(master_key,"AUTH TO KEY"),0,128);
+    priv.secrets.key_HMAC_message = bitarray_slice(lib.HMAC(master_key,"HMAC TO KEY"),0,128);
+    priv.secrets.key_GCM_message = bitarray_slice(lib.HMAC(master_key,"GCM TO KEY"),0,128);
+    priv.secrets.salt = salt
     /* parse the jason into keycahin. */    
     priv.data = JSON.parse(repr)
     // should reset keys here as well
@@ -156,10 +161,9 @@ var keychain = function() {
 		
 		map_copy['salt'] = priv.secrets.salt
 		map_copy['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),string_to_bitarray("AUTHENTICATE"))
-		console.log(map_copy)
-		var sha_check = lib.SHA256(string_to_bitarray(data_json))
+		var sha_check = lib.SHA256(string_to_bitarray(JSON.stringify(map_copy)))
 		var to_return = [JSON.stringify(map_copy),sha_check]
-		console.log(priv.secrets.key_AUTH_message)
+		console.log()
 		return to_return
 	}else{
 		return null
@@ -190,12 +194,7 @@ var keychain = function() {
 		console.log(name);
 		var plain_bits = dec_gcm(setup_cipher(value_key),encrypted);
 	 	var password_padded = bitarray_slice(plain_bits,0,(65+4)*8);
-		console.log(bitarray_len(password_padded))	
-		console.log(password_padded.length) 
 		var password_text = string_from_padded_bitarray(password_padded,65);
-		console.log(bitarray_slice(plain_bits,(65+4)*8,bitarray_len(plain_bits)))
-		console.log(bitarray_len(domain_HMAC))
-		console.log(bitarray_len(plain_bits))
 		if(! bitarray_equal(domain_HMAC,bitarray_slice(plain_bits,(65+4)*8,bitarray_len(plain_bits)))){
 			throw 'SWAPPING ATTACK DETECTED'
 		}

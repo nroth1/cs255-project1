@@ -104,11 +104,12 @@ var keychain = function() {
     
     
     /* check the correctness of the main KEY. */
-    var cipher = setup_cipher(bitarray_slice(key_AUTH_message,0,128));
+    var cipher = setup_cipher(key_AUTH_message);
     var authenticated_output = enc_gcm(cipher, string_to_bitarray("AUTHENTICATE")) 
 
     if (!bitarray_equal(authenticated_output ,data['auth_message'])) {
-  	console.log('broke')
+  	console.log(authenticated_output)
+	console.log(data['auth_message'])
 	//should set ready = false too?! 
     	return false;
     }

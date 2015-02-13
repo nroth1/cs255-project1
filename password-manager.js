@@ -1,6 +1,7 @@
 "use strict";
 
 
+
 /********* External Imports ********/
 
 var lib = require("./lib");
@@ -152,7 +153,28 @@ var keychain = function() {
     * Return Type: string
     */
   keychain.get = function(name) { /*H*/
-    throw "Not implemented!";
+    	if(ready){
+		console.log(name)
+		var domain_key = priv.secrets.key_HMAC_message; 
+   		var value_key = priv.secrets.key_GCM_message;
+    		var domain_HMAC = lib.HMAC(domain_key,name); 
+		if(!(domain_HMAC in priv.data )){
+			return null;	
+		}
+		var encrypted = priv.data[domain_HMAC];
+		//console.log(encrypted);
+		console.log(name);
+		var plain_bits = dec_gcm(setup_cipher(value_key),encrypted);
+	 	var password_padded = bitarray_slice(plain_bits,0,(65+4)*8);
+		console.log(bitarray_len(password_padded))	
+		console.log(password_padded.length) 
+		var password_text = string_from_padded_bitarray(password_padded,65);
+		console.log(name)
+		console.log(password_text)
+		return password_text	
+	}else{
+		throw "NOT READY"
+	}
   }
 
   /** 
@@ -171,12 +193,20 @@ var keychain = function() {
     	 var domain_key = priv.secrets.key_HMAC_message; 
    	 var value_key = priv.secrets.key_GCM_message;
     	 var domain_HMAC = lib.HMAC(domain_key,name);
+
          var val_bits = string_to_padded_bitarray(value,65);
-         var name_bits = string_to_bitarray(domain_HMAC);
+	 var name_bits = string_to_bitarray(domain_HMAC);
+	 //var signed_data = val_bits 
 	 var signed_data = bitarray_concat(val_bits,name_bits);
-	 var encrypted_data = enc_gcm(setup_cipher( value_key ) ,signed_data)
-	 priv.data.domain_HMAC = encrypted_data 
-	 
+	 var encrypted_data = enc_gcm(setup_cipher( value_key ) , signed_data);
+	 priv.data[domain_HMAC] = encrypted_data ;
+	 //console.log(encrypted_data)
+	 //var plain_bits = dec_gcm(setup_cipher(value_key),encrypted_data);
+	 //var temp = string_from_padded_bitarray(bitarray_slice(plain_bits,0,(65+4)*8),65))
+      	console.log('-------------') 
+	console.log(name)
+	 console.log(value)
+	console.log('--------------')
     }else{
     	throw "NOT READY"
     }

@@ -102,7 +102,6 @@ var keychain = function() {
     var master_key = lib.KDF(password,salt);
     var key_AUTH_message = bitarray_slice(lib.HMAC(master_key,"AUTH TO KEY"),0,128);
     
-    console.log(key_AUTH_message) 
     /* check the correctness of the main KEY. */
     var cipher = setup_cipher(key_AUTH_message);	
     var authenticated_output = dec_gcm(cipher, data['auth_message']) 
@@ -117,8 +116,8 @@ var keychain = function() {
     if (trusted_data_check) {
         /* noraml way: compute the checksum of the repr string and compare it with the 
         provided SHA-256 hash. */
-        hash_value = SHA256(string_to_bitarray(repr))
-        if (hash_value != trusted_data_check) throw "INVALID REPR!";
+        var hash_value = SHA256(string_to_bitarray(repr))
+        if (! bitarray_equal(hash_value,trusted_data_check)) throw "INVALID REPR!";
         
         /* extra credit: encrypt the counter concatenated with the repr string, compute
         the checksum of the cipher text and compare it with the stored SHA-256 hash. */
@@ -128,7 +127,8 @@ var keychain = function() {
     }
 
     /* parse the jason into keycahin. */    
-    keychain = JSON.parse(repr)
+    priv.data = JSON.parse(repr)
+    // should reset keys here as well
     ready = true;
 
     return true;
@@ -157,7 +157,7 @@ var keychain = function() {
 		map_copy['salt'] = priv.secrets.salt
 		map_copy['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),string_to_bitarray("AUTHENTICATE"))
 		console.log(map_copy)
-		var sha_check = lib.SHA256(data_json)
+		var sha_check = lib.SHA256(string_to_bitarray(data_json))
 		var to_return = [JSON.stringify(map_copy),sha_check]
 		console.log(priv.secrets.key_AUTH_message)
 		return to_return

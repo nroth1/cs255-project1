@@ -39,7 +39,7 @@ var keychain = function() {
   // Class-private instance variables.
   var priv = {
     secrets: { SHA_hash:'',salt:'', 
-            auth_message:'', auth_cipher_text:'', 
+            key_AUTH_message:'', 
             key_HMAC_message:'', key_GCM_message:'' },
     data: {  }
   };
@@ -66,12 +66,13 @@ var keychain = function() {
     ready = true;
     priv.secrets = {}
     priv.data = {}
-    priv.data.salt = lib.random_bitarray(128); 
-    var master_key = lib.KDF(password,priv.data.salt);
+    priv.secrets.salt = lib.random_bitarray(128); 
+    var master_key = lib.KDF(password,priv.secrets.salt);
     //priv.secrets.auth_message = "Authenticated correctly";
-     
+    priv.secrets.key_AUTH_message = bitarray_slice(lib.HMAC(master_key,"AUTH TO KEY"),0,128);
     priv.secrets.key_HMAC_message = bitarray_slice(lib.HMAC(master_key,"HMAC TO KEY"),0,128);
     priv.secrets.key_GCM_message = bitarray_slice(lib.HMAC(master_key,"GCM TO KEY"),0,128);
+    
     //var cipher = lib.setup_cipher(bitarray_slice(master_key,0,128));
     console.log( priv.secrets.key_GCM_message   )
     priv.secrets.version = "CS 255 Password Manager v1.0";
@@ -139,7 +140,16 @@ var keychain = function() {
     * Return Type: array
     */ 
   keychain.dump = function() { /*N*/
-    throw "Not implemented!";
+  	if(ready){
+		var data_json = JSON.stringify(priv.data)
+		data_json['salt'] = priv.secrets.salt
+		data_json['auth_message'] = enc_gcm(setup_cipher(priv.secrets.key_AUTH_message),"AUTHENTICATE")
+		var sha_check = lib.SHA256(data_json)
+		var to_return = [data_json,sha_check]
+		return to_return
+	}else{
+		return null
+	}
   }
 
   /**

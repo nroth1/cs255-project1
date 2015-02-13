@@ -98,16 +98,14 @@ var keychain = function() {
   keychain.load = function(password, repr, trusted_data_check) { /*H*/
     /* generate the main KEY from the given password. */ 
     var data = JSON.parse(repr)
-    console.log(data) 
-    priv.secrets.salt = data['salt']
-
-    console.log(priv.secrets.salt)
-    var key = lib.KDF(password, priv.secrets.salt);
-   
+    var salt = data['salt']
+    var master_key = lib.KDF(password,salt);
+    var key_AUTH_message = bitarray_slice(lib.HMAC(master_key,"AUTH TO KEY"),0,128);
+    
+    
     /* check the correctness of the main KEY. */
-    var cipher = setup_cipher(bitarray_slice(key,0,128));
+    var cipher = setup_cipher(bitarray_slice(key_AUTH_message,0,128));
     var authenticated_output = enc_gcm(cipher, string_to_bitarray("AUTHENTICATE")) 
-    console.log(bitarray_len(key))
 
     if (!bitarray_equal(authenticated_output ,data['auth_message'])) {
   	console.log('broke')
